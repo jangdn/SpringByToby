@@ -3,8 +3,6 @@ package main;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import java.sql.*;
-
 import javax.sql.DataSource;
 
 @Configuration
@@ -28,17 +26,4 @@ public class DaoFactory {
         userDao.setDataSource(dataSource());
         return userDao;
     }
-//
-//    @Bean
-//    public UserDao userDao() {
-//        UserDao userDao = new UserDao();
-//        userDao.setConnectionMaker(connectionMaker());
-//        return userDao;
-//    }
-//
-//    @Bean
-//    public ConnectionMaker connectionMaker(){
-//        return new DConnectionMaker();
-//        // return new ProductionDBConnectionMaker();
-//    }
 }

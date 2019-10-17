@@ -1,7 +1,5 @@
 package main;
 
-import org.springframework.test.context.jdbc.Sql;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -20,7 +18,4 @@ public class CountingConnectionMaker implements ConnectionMaker {
         return realConnectionMaker.makeConnection();
     }
 
-    public int getCounter(){
-        return this.counter;
-    }
 }
