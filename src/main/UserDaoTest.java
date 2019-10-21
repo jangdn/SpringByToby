@@ -27,9 +27,9 @@ public class UserDaoTest {
         dao = new UserDao();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "jangdn_user", "akdntm90", true);
         dao.setDataSource(dataSource);
-        this.user = new User("waiteship", "안장우", "married");
-        this.user2 = new User("wbjdgus", "정현", "akdntm93");
-        this.user3 = new User("zztcndl", "수이", "ak90");
+        this.user = new User("waiteship", "안장우", "married", Level.GOLD, 1, 0);
+        this.user2 = new User("wbjdgus", "정현", "akdntm93", Level.SILVER, 50, 100);
+        this.user3 = new User("zztcndl", "수이", "ak90", Level.BASIC, 24, 1000);
     }
 
     @Test
@@ -43,11 +43,13 @@ public class UserDaoTest {
         assertThat(dao.getCount(), is(2));
 
         User usertarget1 = dao.get(user.getId());
+        checkSameUser(user, usertarget1);
 
         assertThat(usertarget1.getName(), is(user.getName()));
         assertThat(usertarget1.getPassword(), is(user.getPassword()));
 
         User usertarget2 = dao.get(user2.getId());
+        checkSameUser(user2, usertarget2);
         assertThat(usertarget2.getName(), is(user2.getName()));
         assertThat(usertarget2.getPassword(), is(user2.getPassword()));
 
@@ -106,5 +108,8 @@ public class UserDaoTest {
         assertThat(user.getId(), is(vsUser.getId()));
         assertThat(user.getPassword(), is(vsUser.getPassword()));
         assertThat(user.getName(), is(vsUser.getName()));
+        assertThat(user.getLevel(), is(vsUser.getLevel()));
+        assertThat(user.getLogin(), is(vsUser.getLogin()));
+        assertThat(user.getRecommend(), is(vsUser.getRecommend()));
     }
 }

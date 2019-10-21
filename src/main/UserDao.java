@@ -18,6 +18,9 @@ public class UserDao {
                     user.setId(resultSet.getString("id"));
                     user.setName(resultSet.getString("name"));
                     user.setPassword(resultSet.getString("password"));
+                    user.setLevel(Level.valueOf(resultSet.getInt("level")));
+                    user.setLogin(resultSet.getInt("login"));
+                    user.setRecommend(resultSet.getInt("recommend"));
                     return user;
                 }
             };
@@ -29,7 +32,7 @@ public class UserDao {
     }
 
     public void add(final User user) {
-        this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
+        this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommend) values(?,?,?,?,?,?)", user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend());
     }
 
     public User get(String id) {
