@@ -5,6 +5,12 @@ public class User {
     String name;
     String password;
 
+    private static final int BASIC = 1;
+    private static final int SILVER = 2;
+    private static final int GOLD = 3;
+
+    int level;
+
     public User(String id, String name, String password) {
         this.id = id;
         this.name = name;
@@ -37,5 +43,11 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setLevel(int level) { this.level = level; }
+
+    public int getLevel() {
+        return level;
     }
 }
