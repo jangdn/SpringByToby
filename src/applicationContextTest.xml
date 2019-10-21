@@ -11,7 +11,7 @@
         <property name="username" value="jangdn_user" />
         <property name="password" value="akdntm90" />
     </bean>
-    <bean id="userDao" class="main.UserDao">
+    <bean id="userDao" class="main.dao.UserDaoJdbc">
         <property name="dataSource" ref="dataSource" />
     </bean>
 </beans>

@@ -1,13 +1,17 @@
 package main;
 
+import main.dao.UserDaoJdbc;
+import main.user.Level;
+import main.user.User;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -15,7 +19,10 @@ import static org.junit.Assert.assertThat;
 
 @ContextConfiguration(locations = "/applicationContextTest.xml")
 public class UserDaoTest {
-    UserDao dao;
+    @Autowired
+    private UserDaoJdbc dao;
+    @Autowired
+    private DataSource dataSource;
 
     private User user;
     private User user2;
@@ -24,7 +31,7 @@ public class UserDaoTest {
     @Before
     public void setUp() {
         System.out.println(this);
-        dao = new UserDao();
+        dao = new UserDaoJdbc();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "jangdn_user", "akdntm90", true);
         dao.setDataSource(dataSource);
         this.user = new User("waiteship", "안장우", "married", Level.GOLD, 1, 0);
@@ -104,6 +111,36 @@ public class UserDaoTest {
 
     }
 
+    @Test(expected = DataAccessException.class)
+    public void duplciateKey(){
+        dao.deleteAll();
+
+        dao.add(user);
+        dao.add(user);
+    }
+
+    @Test
+    public void update(){
+        dao.deleteAll();
+
+        dao.add(user);
+        dao.add(user2);
+
+        user.setName("끌끌");
+        user.setPassword("pring");
+        user.setLevel(Level.BASIC);
+        user.setLogin(900);
+        user.setRecommend(3000);
+
+        dao.update(user);
+
+        User userupdate = dao.get(user.getId());
+        checkSameUser(user, userupdate);
+
+        User usernotupdate = dao.get(user2.getId());
+        checkSameUser(user2, usernotupdate);
+    }
+
     private void checkSameUser(User user, User vsUser) {
         assertThat(user.getId(), is(vsUser.getId()));
         assertThat(user.getPassword(), is(vsUser.getPassword()));
@@ -112,4 +149,5 @@ public class UserDaoTest {
         assertThat(user.getLogin(), is(vsUser.getLogin()));
         assertThat(user.getRecommend(), is(vsUser.getRecommend()));
     }
+
 }

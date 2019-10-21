@@ -1,4 +1,4 @@
-package main;
+package main.user;
 
 public class User {
     String id;
