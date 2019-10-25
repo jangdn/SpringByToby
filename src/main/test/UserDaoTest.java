@@ -1,7 +1,4 @@
-package main.dao;
-
 import main.dao.UserDaoJdbc;
-import main.main;
 import main.user.Level;
 import main.user.User;
 import org.junit.Before;
