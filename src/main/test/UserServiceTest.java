@@ -1,4 +1,6 @@
 
+import main.service.UserLevelUpgradeMy;
+import main.service.UserLevelUpgradePolicy;
 import main.service.UserService;
 import main.user.Level;
 import main.user.User;
@@ -18,6 +20,7 @@ import static main.service.UserService.MIN_RECOMMEND_FOR_GOLD;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/applicationContextTest.xml")
@@ -82,4 +85,48 @@ public class UserServiceTest {
         assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
         assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
     }
+
+    @Test
+    public void upgradeAllOrNothing() {
+        UserService testUserService = new TestUserService(users.get(3).getId());
+        testUserService.setUserDao(userService.userDao);
+        testUserService.userDao.deleteAll();
+        for(User user:users) testUserService.add(user);
+
+        try {
+            testUserService.upgradeLevels();
+            fail("TestUserServiceException expected");
+        }
+        catch (TestUserServiceException e) {
+
+        }
+
+        checkLevelUpgraded(users.get(1), false);
+    }
+
+    static class TestUserService extends UserService{
+        private String id ;
+        private UserLevelUpgradePolicy userLevelUpgradePolicy;
+        public TestUserService(String id){
+            this.id = id;
+            userLevelUpgradePolicy = new UserLevelUpgradeMy();
+        }
+
+        @Override
+        public void upgradeLevels() {
+            List<User> users = userDao.getAll();
+            for (User user : users) {
+                if (userLevelUpgradePolicy.canUpgradeLevel(user)) {
+                    if (user.getId().equals(this.id)) throw new TestUserServiceException();
+                    user.upgradeLevel();
+                    userDao.update(user);
+                }
+            }
+        }
+    }
+
+    static class TestUserServiceException extends RuntimeException {
+
+    }
 }
+
