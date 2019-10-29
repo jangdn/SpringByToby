@@ -5,7 +5,12 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import main.dao.UserDao;
@@ -15,7 +20,11 @@ import main.domain.User;
 public class UserService {
 	public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
 	public static final int MIN_RECCOMEND_FOR_GOLD = 30;
+	private PlatformTransactionManager transactionManager;
 
+	public void setTransactionManager(PlatformTransactionManager transactionManager){
+		this.transactionManager = transactionManager;
+	}
 	private UserDao userDao;
 
 	public void setUserDao(UserDao userDao) {
@@ -24,30 +33,21 @@ public class UserService {
 	
 	private DataSource dataSource;  			
 
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-	
 	public void upgradeLevels() throws Exception {
-		TransactionSynchronizationManager.initSynchronization();  
-		Connection c = DataSourceUtils.getConnection(dataSource); 
-		c.setAutoCommit(false);
-		
-		try {									   
+
+		TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+		try {
 			List<User> users = userDao.getAll();
 			for (User user : users) {
 				if (canUpgradeLevel(user)) {
 					upgradeLevel(user);
 				}
 			}
-			c.commit();  
-		} catch (Exception e) {    
-			c.rollback();
+			this.transactionManager.commit(status);
+		} catch (Exception e) {
+			this.transactionManager.rollback(status);
 			throw e;
-		} finally {
-			DataSourceUtils.releaseConnection(c, dataSource);	
-			TransactionSynchronizationManager.unbindResource(this.dataSource);  
-			TransactionSynchronizationManager.clearSynchronization();  
 		}
 	}
 	
