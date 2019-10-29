@@ -31,7 +31,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserServiceTest {
-	@Autowired UserService userService;	
+	@Autowired
+	UserService userService;
 	@Autowired UserDao userDao;
 	@Autowired DataSource dataSource;
 	@Autowired PlatformTransactionManager transactionManager;
@@ -103,7 +104,7 @@ public class UserServiceTest {
  
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
-		UserService testUserService = new TestUserService(users.get(3).getId());  
+		UserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao); 
 		testUserService.setTransactionManager(transactionManager);
 		testUserService.setMailSender(mailSender);
