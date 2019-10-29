@@ -1,21 +1,21 @@
 package main.dao;
 
-import main.user.User;
-
 import java.util.List;
 
+import main.domain.User;
 
 public interface UserDao {
 
-    public void add(final User user);
+	void add(User user);
 
-    public User get(String id);
+	User get(String id);
 
-    public List<User> getAll();
+	List<User> getAll();
 
-    public void update(User user);
+	void deleteAll();
 
-    public void deleteAll();
+	int getCount();
 
-    public int getCount();
+	void update(User user);
+
 }
