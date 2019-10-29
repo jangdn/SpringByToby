@@ -16,12 +16,14 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 
 import main.dao.UserDao;
 import main.domain.Level;
@@ -32,6 +34,12 @@ public class UserService {
 	public static final int MIN_RECCOMEND_FOR_GOLD = 30;
 	private PlatformTransactionManager transactionManager;
 
+	public void setMailSender(MailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	private MailSender mailSender;
+
 	public void setTransactionManager(PlatformTransactionManager transactionManager){
 		this.transactionManager = transactionManager;
 	}
@@ -40,7 +48,7 @@ public class UserService {
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
 	}
-	
+
 	private DataSource dataSource;  			
 
 	public void upgradeLevels() throws Exception {
@@ -78,25 +86,13 @@ public class UserService {
 	}
 
 	private void sendUpgradeEmail(User user) {
-		Properties props = new Properties();
-		props.put("mail.smtp.host", "mail.ksug.org");
-		Session s = Session.getInstance(props, null);
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setTo(user.getEmail());
+		mailMessage.setFrom("useradmin@ksug.org");
+		mailMessage.setSubject("Upgrade 안내");
+		mailMessage.setText("사용자님의 등급이 " + user.getLevel().name() + "로 업그레이드 되었습니다.");
 
-		MimeMessage message = new MimeMessage(s);
-		try {
-			message.setFrom(new InternetAddress("useradmin@ksug.org"));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-			message.setSubject("Upgrade 안내");
-			message.setText("사용자님의 등급이 " + user.getLevel().name() + "로 업그레이드 되었습니다.");
-			Transport.send(message);
-		} catch (AddressException e) {
-			throw new RuntimeException(e);
-		} catch (MessagingException e) {
-			throw new RuntimeException(e);
-		}
-//		catch (UnsupportedEncodingException e) {
-//			throw new RuntimeException(e);
-//		}
+		this.mailSender.send(mailMessage);
 	}
 
 	public void add(User user) {
