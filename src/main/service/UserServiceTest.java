@@ -1,34 +1,30 @@
 package main.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static main.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
-import static main.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import main.dao.UserDao;
+import main.domain.Level;
+import main.domain.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import main.dao.UserDao;
-import main.domain.Level;
-import main.domain.User;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.List;
+
+import static main.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static main.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
@@ -115,9 +111,12 @@ public class UserServiceTest {
 		testUserService.setUserDao(this.userDao); 
 		testUserService.setMailSender(mailSender);
 
-		UserServiceTx txUserService = new UserServiceTx();
-		txUserService.setTransactionManager(transactionManager);
-		txUserService.setUserService(testUserService);
+		TransactionHandler txHandler = new TransactionHandler();
+		txHandler.setTarget(testUserService);
+		txHandler.setTransactionManager(transactionManager);
+		txHandler.setPattern("upgradeLevels");
+
+		UserService txUserService = (UserService) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {UserService.class}, txHandler);
 
 		userDao.deleteAll();
 		for(User user : users) userDao.add(user);
