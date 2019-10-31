@@ -62,7 +62,7 @@ public class UserServiceTest {
 		when(mockUserDao.getAll()).thenReturn(this.users);
 		userServiceImpl.setUserDao(mockUserDao);
 
-		MockMailSender mockMailSender = new MockMailSender();
+		MailSender mockMailSender = mock(MailSender.class);
 		userServiceImpl.setMailSender(mockMailSender);
 
 		userServiceImpl.upgradeLevels();
@@ -148,58 +148,5 @@ public class UserServiceTest {
 	
 	static class TestUserServiceException extends RuntimeException {
 	}
-
-	static class MockMailSender implements MailSender {
-		private List<String> requests = new ArrayList<String>();
-
-		public List<String> getRequests() {
-			return requests;
-		}
-
-		@Override
-		public void send(SimpleMailMessage simpleMailMessage) throws MailException {
-			requests.add(simpleMailMessage.getTo()[0]);
-		}
-
-		@Override
-		public void send(SimpleMailMessage... simpleMailMessages) throws MailException {
-
-		}
-	}
-
-	static class MockUserDao implements UserDao {
-		private List<User> users;
-		private List<User> updated = new ArrayList();
-
-		public MockUserDao(List<User> users) {
-			this.users = users;
-		}
-
-		public List<User> getUpdated() {
-			return updated;
-		}
-
-		@Override
-		public void update(User user) {
-			updated.add(user);
-		}
-
-		@Override
-		public List<User> getAll() { return this.users; }
-
-		@Override
-		public void add(User user) { throw new UnsupportedOperationException(); }
-
-		@Override
-		public User get(String id) { throw new UnsupportedOperationException(); }
-
-		@Override
-		public void deleteAll() { throw new UnsupportedOperationException(); }
-
-		@Override
-		public int getCount() { throw new UnsupportedOperationException(); }
-	}
-
-
 }
 
